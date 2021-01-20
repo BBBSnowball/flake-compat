@@ -93,7 +93,7 @@ let
     # Try to clean the source tree by using fetchGit, if this source
     # tree is a valid git repository.
     tryFetchGit = src:
-      if isGit && !isShallow
+      if isGit && !isShallow && hasBranch
       then
         let res = builtins.fetchGit src;
         in if res.rev == "0000000000000000000000000000000000000000" then removeAttrs res ["rev" "shortRev"]  else res
@@ -101,6 +101,8 @@ let
     # NB git worktrees have a file for .git, so we don't check the type of .git
     isGit = builtins.pathExists (src + "/.git");
     isShallow = builtins.pathExists (src + "/.git/shallow");
+    # Repos without commits do not have any heads.
+    hasBranch = builtins.pathExists (src + "/.git/refs/heads") && builtins.readDir (src + "/.git/refs/heads") != { };
 
   in
     { lastModified = 0; lastModifiedDate = formatSecondsSinceEpoch 0; }
