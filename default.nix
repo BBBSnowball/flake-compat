@@ -5,7 +5,7 @@
 # containing 'defaultNix' (to be used in 'default.nix'), 'shellNix'
 # (to be used in 'shell.nix').
 
-{ src, system ? builtins.currentSystem or "unknown-system", inputOverrides ? {} }:
+{ src, system ? builtins.currentSystem or "unknown-system", inputOverrides ? {}, outputFunctionOverrides ? {} }:
 
 let
 
@@ -169,7 +169,7 @@ let
                 (resolveInput lockFile.nodes.${nodeName}.inputs.${builtins.head path})
                 (builtins.tail path);
 
-          outputs = flake.outputs (inputs // { self = result; });
+          outputs = (outputFunctionOverrides.${key} or flake.outputs) (inputs // { self = result; });
 
           result = outputs // sourceInfo // { inherit inputs; inherit outputs; inherit sourceInfo; };
         in
